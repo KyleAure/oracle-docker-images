@@ -3,6 +3,8 @@ Oracle Database 18c (version 18.4.0)
 
 >⚠️ Version 1.0 has a flaw!  The user SYSTEM's password expires 03/05/2021.  Upgrade to version 2.0 where the user SYSTEM's password never expires. 
 
+>⚠️ Test container not for production use
+
 ## Build from source
 Script to build image is available on GitHub at: https://github.com/KyleAure/oracle-docker-images 
 
