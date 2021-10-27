@@ -1,63 +1,19 @@
 # Oracle Docker Images
 
-> ⚠️ Docker image version 1.0 has a flaw! The user SYSTEM's password expires 03/05/2021. Upgrade to version 2.0 where the user SYSTEM's password never expires. 
+This repo provides two ways to automate the process of creating a prebuilt oracle docker image.
 
-This repo provides a script to automate the process of creating a prebuilt oracle docker image.
+# Version 1
+Link: [From Oracle Repo](https://github.com/KyleAure/oracle-docker-images/blob/master/version1/README.md)
 
-## Background
-Oracle offers an [official enterprise database docker](https://hub.docker.com/_/oracle-database-enterprise-edition).
+This method was originally published by oracle and released under their Universal Permissive License.
+The edits I made to this method was to pre-build the oracle database to improve performance at container runtime.
 
-Using this official image requires users to agree to a [click through license agreement](https://www.oracle.com/downloads/licenses/standard-license.html). 
+This container is published at: https://hub.docker.com/r/kyleaure/oracle-18.4.0-xe-prebuilt
 
-Additionally, the database is not built until runtime, meaning that container startup takes approx. 10 minutes.
+# Version 2
+Link: [From Oracle Dockerhub](https://github.com/KyleAure/oracle-docker-images/blob/master/version2/README.md)
 
-## Licensing
-Oracle offers their own scripts to create an oracle database docker image in the [oracle/docker-images](https://github.com/oracle/docker-images) GitHub repo under a [Universal Permissive License](https://github.com/oracle/docker-images/blob/master/LICENSE).
+This method involves expanding on the existing https://hub.docker.com/r/gvenzl/oracle-xe image released under the Apache 2.0 License.
+The edits I made to this method was to decompress the oracle database to improve performance at container runtime.
 
-Again, this process requires users to download installation binaries from oracle, and by doing so requires user to agree to a [license agreement](https://www.oracle.com/downloads/licenses/standard-license.html). 
-
-That was until oracle released the [Oracle Database 18c XE](https://blogs.oracle.com/database/oracle-database-18c-xe-now-under-the-oracle-free-use-terms-and-conditions-license-v2) binary under a [free use license](https://www.oracle.com/downloads/licenses/oracle-free-license.html), which grants users a license to:
-
-```txt
-(b) redistribute unmodified Programs and Programs Documentation, under the terms of this License, provided that You do not charge Your end users any additional fees for the use of the Programs.
-```
-
-## Prebuilt Database
-The oracle images created from using the scripts from the [oracle/docker-images](https://github.com/oracle/docker-images) GitHub repo still create the database at runtime.
-
-The script in this repository automates the [process documented by oracle](https://github.com/oracle/docker-images/tree/master/OracleDatabase/SingleInstance/samples/prebuiltdb) to create a database image with a pre-built database.
-
-## Building image from source
-Clone this repo, navigate to the source directory and run the `prebuild.sh` script.
-
-```sh
-git clone git@github.com:KyleAure/oracle-docker-images.git
-cd oracle-docker-images/src
-./prebuild.sh
-```
-
-This script will do the following:
-1. Clone the `oracle/docker-images` git repo
-2. Make necessary edits to the `buildDockerImage.sh` and `18.4.0/Dockefile` files to create a prebuilt database image
-3. Run the `buildDockerImage.sh` script to create a base image: `oracle/database:18.4.0-xe`
-4. Run the base image `oracle/database:18.4.0-xe` which will create the database.
-5. Commit this container to a new image `oracle/database:18.4.0-xe-prebuilt`
-6. Clean up the intermediary containers, and remove the `oracle/docker-images` repo.
-
-## Pull from dockerhub
-```sh
-docker pull kyleaure/oracle-18.4.0-xe-prebuilt
-```
-
-## Publishing to dockerhub
-To push this image to a **private** dockerhub repository.
-
-Create a private repository named:
-```txt
-<dockerhub-username>/oracle-18.4.0-xe-prebuilt
-```
-Then run the `prebuild.sh` script with the push parameter.
-```sh
-# version is typically 1.0 or latest
-./prebuild.sh -p -u <dockerhub-username> -v <dockerhub-version>
-```
+This container is published at: https://hub.docker.com/r/kyleaure/oracle-18.4.0-slim-expanded
