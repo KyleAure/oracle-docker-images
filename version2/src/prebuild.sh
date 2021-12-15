@@ -8,6 +8,8 @@ Usage: prebuildv2.sh [-p [push] -u <docker-username> -v <docker-version>] [-?|-h
 Builds a Docker Image for Oracle Database.
   
 Parameters:
+   -s: use slim image
+   -f: use full image
    -p: perform a docker push after prebuilt database is created
       -u: (required) your dockerhub username
       -v: (required) version of resulting dockerhub image (ex 1.0, latest)
@@ -16,8 +18,10 @@ EOF
 }
 
 #----- ARGUMENTS ------#
-while getopts "o:cpu:v:?h" optname; do
-  case "$optname" in
+while getopts "sfpu:v:h" optname; do
+  case $optname in
+    "s") VERSION_SUFFIX="slim" ;;
+    "f") VERSION_SUFFIX="full" ;;
     "p") DOCKER_PUSH=true ;;
     "u") DOCKER_USER="$OPTARG" ;;
     "v") DOCKER_VERSION="$OPTARG" ;;
@@ -34,8 +38,17 @@ DIR=$(pwd)
 # Image information example: oracle/database:18.4.0-slim-expanded (prefix)/(postfix):(version)-(suffix)
 PREFIX="oracle"                 #Constant
 POSTFIX="database"              #Constant
-VERSION="18.4.0-slim"           #TODO: accept other verisons in the future
+VERSION_BASE="18.4.0"
 SUFFIX="expanded"               #Suffix when pushing to external repo
+
+if [ ! "${VERSION_SUFFIX}" ]; then
+    VERSION="${VERSION_BASE}"
+else 
+    VERSION="${VERSION_BASE}-${VERSION_SUFFIX}"
+fi
+
+
+echo "Using version ${VERSION}"
 
 # Docker arguments provided at build time
 BUILD_ARGS="--squash"
@@ -63,16 +76,20 @@ getImageID() {
 
 # This is when the container will be built and custom preconfiguration step will take place
 dockerBuildBase() {    
-    echoWithColor "---> Building Database Image"
+    echoWithColor "---> Building Database Image from file ${VERSION}.Dockerfile"
     pushd ./config
-        docker build -t $FINAL_IMAGE $BUILD_ARGS .
+        docker build -t $FINAL_IMAGE $BUILD_ARGS -f $VERSION.Dockerfile .
     popd
     echoWithColor "<--- Building Database Image"
 }
 
 # This is when we will push this container to dockerhub
 dockerPush() {
-    local EXTERNAL_IMAGE=$DOCKER_USER/$PREFIX-$VERSION-$SUFFIX:$DOCKER_VERSION
+    if [ ! "${VERSION_SUFFIX}" ]; then
+        local EXTERNAL_IMAGE=$DOCKER_USER/$PREFIX-$VERSION_BASE-$SUFFIX:$DOCKER_VERSION
+    else 
+        local EXTERNAL_IMAGE=$DOCKER_USER/$PREFIX-$VERSION_BASE-$SUFFIX:$DOCKER_VERSION.$VERSION_SUFFIX
+    fi
 
     echoWithColor "---> Pushing $EXTERNAL_IMAGE"
 
@@ -132,8 +149,6 @@ else
         echoWithColor "Unable to push $FINAL_IMAGE to dockerhub."
         echoWithColor "One or more variables are undefined."
         echoWithColor "User: ${DOCKER_USER:-unset} Version: ${DOCKER_VERSION:-unset}"
-
-
     else
         dockerPush
     fi
