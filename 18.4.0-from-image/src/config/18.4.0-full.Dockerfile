@@ -13,6 +13,7 @@ RUN chown oracle:dba ${ORACLE_BASE}/preconfigure.sh && \
     chown oracle:dba ${ORACLE_BASE}/container-entrypoint.sh && \
     chmod ug+x ${ORACLE_BASE}/preconfigure.sh && \
     chmod ug+x ${ORACLE_BASE}/container-entrypoint.sh
+
 #Contains vulnerable log4j library for a feature not need for SSL or Kerberos authentication
 RUN rm -rf /opt/oracle/product/18c/dbhomeXE/md/property_graph/
 USER oracle
